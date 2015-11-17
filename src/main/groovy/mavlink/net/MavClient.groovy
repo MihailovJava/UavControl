@@ -1,10 +1,13 @@
-package control.net
+package mavlink.net
 
 import com.google.common.primitives.Bytes
-import control.mavlink.MavLink
-import control.mavlink.MavLinkCRC
+import mavlink.MavLink
+import mavlink.MavLinkCRC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
+import java.nio.ByteBuffer
+import java.util.concurrent.ConcurrentLinkedQueue
 
 @Component
 class MavClient implements Runnable {
@@ -19,6 +22,9 @@ class MavClient implements Runnable {
         new Thread(this).start()
     }
 
+    Queue<MavLink.Message> msgs = new ConcurrentLinkedQueue<>()
+    Queue<ByteBuffer> byteMsgs = new ConcurrentLinkedQueue<>()
+
     @Override
     void run() {
         def writer = new PrintWriter("dump.txt")
@@ -28,36 +34,63 @@ class MavClient implements Runnable {
         try {
             while (true) {
 
-
                 if (client?.connect()) {
 
                     //client.send(mavPacket);
+                    MavLink.Message msg
+                    synchronized (msgs) {
+                        try {
+                            if(!byteMsgs.empty){
+
+                                def array = byteMsgs.poll().array()
+                                println 'Send ' + MavLink.Message.decodeMessage(array)
+                                client.send(array)
+                            }else {
+                                if (msgs.empty) {
+                                    msg = new MavLink.MSG_HEARTBEAT(
+                                            (short) 2,
+                                            (short) 2,
+                                            0L,
+                                            MavLink.MAV_TYPE_QUADROTOR,
+                                            MavLink.MAV_AUTOPILOT_PIXHAWK,
+                                            MavLink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
+                                            MavLink.MAV_STATE_UNINIT,
+                                            3)
+                                } else {
+                                    msg = msgs.poll()
+                                }
+                                msg.sequenceIndex = count
+                                client.send(msg.encode())
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace()
+                        }
+
+                    }
 
 
                     byte[] received = client.receive()
                     def message
 
 
-                    if(received.length == 1){
+                    if (received.length == 1) {
                         prefix = received
-                    }else
-                    if(received.length > 6){
+                    } else if (received.length > 6) {
                         try {
-                            def bytes = Bytes.concat(prefix, received)
+                            def bytes = received[0] == 0xFE ? received : Bytes.concat(prefix ?:  (byte[])[0xFE], received)
 
                             String toHex = convertToHex(bytes.encodeHex().toString())
                             println toHex
                             println MavLink.Message.decodeMessage(bytes)
-                            int crc = MavLinkCRC.calcCRC(Arrays.copyOf(bytes,bytes.length-2));
+                            int crc = MavLinkCRC.calcCRC(Arrays.copyOf(bytes, bytes.length - 2));
 
-                            println (crc & 0xFF)
-                            println (crc >> 8)
+                            println(crc & 0xFF)
+                            println(crc >> 8)
 
                             writer.append("packet $count \n")
                             writer.append(toHex)
                             writer.append('\n')
-                            println count++
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace()
                         }
 
@@ -84,12 +117,8 @@ class MavClient implements Runnable {
 
                 client.send((byte[])packet)*/
 
-                    // sleep(1)
-                    if (flag){
-                        MavLink.Message msg = new MavLink.MSG_REQUEST_DATA_STREAM(2,2,1,1,1)
-                        client.send(msg.encode())
-                        flag = false;
-                    }
+                    sleep(1000)
+                    println count++
                 }
             }
         }catch (Exception e){}

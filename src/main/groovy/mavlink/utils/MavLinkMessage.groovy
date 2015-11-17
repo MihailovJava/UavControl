@@ -1,4 +1,4 @@
-package control.mavlink
+package mavlink.utils
 
 
 enum MavLinkMessage {

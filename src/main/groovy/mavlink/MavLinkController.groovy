@@ -1,4 +1,6 @@
-package control.mavlink
+package mavlink
+
+import mavlink.utils.MavLinkMessage
 
 
 class MavLinkController {

@@ -1,4 +1,4 @@
-package control.mavlink;
+package mavlink;
 
 public class MavLinkCRC {
     private static final int[] MAVLINK_MESSAGE_CRCS = {50, 124, 137, 0, 237,

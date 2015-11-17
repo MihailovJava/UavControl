@@ -1,4 +1,4 @@
-package control.net
+package mavlink.net
 
 import tcp.server.org.springframework.tcp.TcpController
 

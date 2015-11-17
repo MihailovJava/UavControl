@@ -1,4 +1,4 @@
-package control.mavlink;
+package mavlink;
 
 import java.nio.ByteBuffer;
 

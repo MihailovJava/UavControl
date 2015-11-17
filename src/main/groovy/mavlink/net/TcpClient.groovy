@@ -1,4 +1,4 @@
-package control.net
+package mavlink.net
 
 
 interface TcpClient {
