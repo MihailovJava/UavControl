@@ -48,8 +48,8 @@ class MavClient implements Runnable {
                             }else {
                                 if (msgs.empty) {
                                     msg = new MavLink.MSG_HEARTBEAT(
-                                            (short) 2,
-                                            (short) 2,
+                                            MavLink.MAV_SYSTEM_ID,
+                                            MavLink.MAV_COMPONENT_ID,
                                             0L,
                                             MavLink.MAV_TYPE_QUADROTOR,
                                             MavLink.MAV_AUTOPILOT_PIXHAWK,
@@ -77,15 +77,17 @@ class MavClient implements Runnable {
                         prefix = received
                     } else if (received.length > 6) {
                         try {
-                            def bytes = received[0] == 0xFE ? received : Bytes.concat(prefix ?:  (byte[])[0xFE], received)
+                            int size = received[1] & 0xFF;
+                            def bytes = received[0] == (byte)0xFE ? Arrays.copyOfRange(received,0,6+size+2) : Bytes.concat(prefix ?:  (byte[])[0xFE], Arrays.copyOfRange(received,0,6+size+2))
 
                             String toHex = convertToHex(bytes.encodeHex().toString())
                             println toHex
                             println MavLink.Message.decodeMessage(bytes)
-                            int crc = MavLinkCRC.calcCRC(Arrays.copyOf(bytes, bytes.length - 2));
-
-                            println(crc & 0xFF)
-                            println(crc >> 8)
+                            int crc = MavLinkCRC.calcCRC(Arrays.copyOf(bytes, bytes.length - 2))
+                            println((crc & 0xFF) + ' ' + (bytes[bytes.length-2] &  0xFF) )
+                            println( ((crc >> 8) & 0xFF) + ' ' + (bytes[bytes.length-1] & 0xFF) )
+                            println((crc & 0xFF) == (bytes[bytes.length-2] &  0xFF))
+                            println(((crc >> 8) & 0xFF) == (bytes[bytes.length-1] & 0xFF))
 
                             writer.append("packet $count \n")
                             writer.append(toHex)

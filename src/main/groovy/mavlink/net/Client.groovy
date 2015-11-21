@@ -52,7 +52,7 @@ class Client implements TcpClient{
     @Override
     byte[] receive() {
         if (!socket.isClosed()) {
-            byte[] tmp = new byte[256]
+            byte[] tmp = new byte[2*1024]
             int size = socket.inputStream.read(tmp)
             return Arrays.copyOf(tmp,size)
         }

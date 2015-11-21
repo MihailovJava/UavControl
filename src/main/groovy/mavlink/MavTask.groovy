@@ -20,8 +20,8 @@ class MavTask {
 
 
     @PostConstruct
-    void init(){
-        def file = new File(environment.getProperty('mavlink.task.file.name'))
+    void init() {
+        def file = new File(environment.getProperty('mavlink.task.file.name'))/*
         file.withReader {r ->
             def lines = r.readLines()
             lines.each { line ->
@@ -29,6 +29,26 @@ class MavTask {
                 mavClient.byteMsgs.add(ByteBuffer.wrap(bytes))
             }
         }
+        */
+        mavClient.msgs.add(new MavLink.MSG_REQUEST_DATA_STREAM(
+                MavLink.MAV_SYSTEM_ID,
+                MavLink.MAV_COMPONENT_ID,
+                20,
+                MavLink.MAV_SYSTEM_ID,
+                MavLink.MAV_COMPONENT_ID,
+                0,
+                1
+
+        ))
+        mavClient.msgs.add(new MavLink.MSG_REQUEST_DATA_STREAM(
+                MavLink.MAV_SYSTEM_ID,
+                MavLink.MAV_COMPONENT_ID,
+                20,
+                MavLink.MAV_SYSTEM_ID,
+                MavLink.MAV_COMPONENT_ID,
+                0,
+                1
+        ))
     }
 
 }

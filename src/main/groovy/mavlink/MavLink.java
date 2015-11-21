@@ -7,6 +7,9 @@ public class MavLink {
 	private static final int PROTOCOL_VERSION = 3;
 	private static final short PACKET_START_SIGN = 0xFE; //v1.0: 0xFE; v0.9: 0x55
 	private static final int HEADER_LENGTH = 8; // Overhead size
+
+	public static final short MAV_SYSTEM_ID = 2;
+	public static final short MAV_COMPONENT_ID = 2;
 	
 	// Mavlink constants
 	
@@ -4357,7 +4360,7 @@ public class MavLink {
 		
 			
 		protected ByteBuffer decodePayload(ByteBuffer buffer) {
-			
+			text = new char[50];
 			severity = (int)buffer.get() & 0xff; // uint8_t
   			for(int c=0; c<50; ++c) {
 				text [c] =  (char)buffer.get(); // char[50]
@@ -4380,7 +4383,7 @@ public class MavLink {
 		public String toString() {
 			return "MSG_STATUSTEXT { " + 
 			"severity = " + severity + ", " + 
-			"text = " + text + ",  }";
+			"text = " + new String(text).replaceAll("\0","") + ",  }";
 		}
 	}
 	public static class MSG_VICON_POSITION_ESTIMATE extends Message {
