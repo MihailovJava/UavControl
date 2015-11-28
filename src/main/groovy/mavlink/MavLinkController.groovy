@@ -1,17 +1,10 @@
 package mavlink
 
-import mavlink.utils.MavLinkMessage
+import mavlink.net.MavConnection
 
 
 class MavLinkController {
 
+    List<MavConnection> connectionList
 
-
-    byte[] decodeMavlinkMesssage(MavLinkMessage message){
-
-    }
-
-    MavLinkMessage encodeMavlinkMessage(byte[] data){
-        return null
-    }
 }

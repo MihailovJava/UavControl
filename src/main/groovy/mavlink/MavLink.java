@@ -1,6 +1,9 @@
 package mavlink;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 
 public class MavLink {
 	
@@ -8,9 +11,10 @@ public class MavLink {
 	private static final short PACKET_START_SIGN = 0xFE; //v1.0: 0xFE; v0.9: 0x55
 	private static final int HEADER_LENGTH = 8; // Overhead size
 
-	public static final short MAV_SYSTEM_ID = 2;
-	public static final short MAV_COMPONENT_ID = 2;
-	
+	public static final short MAV_SYSTEM_ID = 1;
+	public static final short MAV_COMPONENT_ID = 1;
+	public static final short MAV_TARGET_SYSTEM_ID = 1;
+	public static final short MAV_TARGET_COMPONENT_ID = 1;
 	// Mavlink constants
 	
 	/*
@@ -687,6 +691,7 @@ public class MavLink {
 	
 		protected Message(byte[] bytes) {
 			ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
 			short startSign = (short)(buffer.get() & 0xFF);
 			
 			if(startSign != PACKET_START_SIGN) {
@@ -707,7 +712,30 @@ public class MavLink {
 			
 			decodePayload(buffer);
 		}
-		
+
+		public Message revert(){
+			ByteBuffer buffer = ByteBuffer.wrap(this.encode());
+			buffer.order(ByteOrder.LITTLE_ENDIAN);
+			short startSign = (short)(buffer.get() & 0xFF);
+
+			if(startSign != PACKET_START_SIGN) {
+				throw new IllegalStateException("Unsupported protocol. Excepted: " +
+						PACKET_START_SIGN + " got: " + startSign);
+			}
+
+			buffer.get(); // payload length, ignore
+			this.sequenceIndex = (short)(buffer.get() & 0xFF);
+			this.systemId = (short)(buffer.get() & 0xFF);
+			this.componentId = (short)(buffer.get() & 0xFF);
+
+			short messageId = (short)(buffer.get() & 0xFF);
+			decodePayload(buffer);
+
+			return this;
+		}
+
+
+
 		protected Message(short systemId, short componentId) {
 			this.systemId = systemId;
 			this.componentId = componentId;
@@ -12664,8 +12692,21 @@ public class MavLink {
 		
 			
 		protected ByteBuffer decodePayload(ByteBuffer buffer) {
-			
-			airspeed = buffer.getFloat(); // float
+
+			airspeed =  buffer.getFloat(); // float
+		/*	int bits = Float.floatToIntBits(airspeed);
+			byte[] bytes = new byte[4];
+			bytes[0] = (byte)(bits & 0xff);
+			bytes[1] = (byte)((bits >> 8) & 0xff);
+			bytes[2] = (byte)((bits >> 16) & 0xff);
+			bytes[3] = (byte)((bits >> 24) & 0xff);
+			int asInt = (bytes[3] & 0xFF)
+					| ((bytes[2] & 0xFF) << 8)
+					| ((bytes[1] & 0xFF) << 16)
+					| ((bytes[0] & 0xFF) << 24);
+
+			float asFloat = Float.intBitsToFloat(asInt);
+			buffer.get*/
   			groundspeed = buffer.getFloat(); // float
   			alt = buffer.getFloat(); // float
   			climb = buffer.getFloat(); // float
@@ -13522,9 +13563,7 @@ public class MavLink {
 		protected ByteBuffer decodePayload(ByteBuffer buffer) {
 			
 			time_boot_ms = buffer.getInt() & 0xffffffff; // uint32_t
-  			for(int c=0; c<4; ++c) {
- 			}
-			
+
  			body_roll_rate = buffer.getFloat(); // float
   			body_pitch_rate = buffer.getFloat(); // float
   			body_yaw_rate = buffer.getFloat(); // float
@@ -13538,8 +13577,7 @@ public class MavLink {
 		protected ByteBuffer encodePayload(ByteBuffer buffer) {
 			
 			buffer.putInt((int)(time_boot_ms & 0xffffffff)); // uint32_t
-  			for(int c=0; c<4; ++c) {
- 			}
+
 			
  			buffer.putFloat(body_roll_rate); // float
   			buffer.putFloat(body_pitch_rate); // float
@@ -13946,7 +13984,7 @@ public class MavLink {
 		
 			
 		protected ByteBuffer decodePayload(ByteBuffer buffer) {
-			
+			param_id = new char[16];
 			param_value = buffer.getFloat(); // float
   			param_count = buffer.getShort() & 0xffff; // uint16_t
   			param_index = buffer.getShort() & 0xffff; // uint16_t
@@ -14650,7 +14688,16 @@ public class MavLink {
 		
 			
 		protected ByteBuffer decodePayload(ByteBuffer buffer) {
-			
+			//packet.time_usec = time_usec;
+			//packet.lat = lat;
+			//packet.lon = lon;
+			//packet.alt = alt;
+			//packet.eph = eph;
+			//packet.epv = epv;
+			//packet.vel = vel;
+			//packet.cog = cog;
+			//packet.fix_type = fix_type;
+			//packet.satellites_visible = satellites_visible;
 			time_usec = buffer.getLong(); // uint64_t
   			lat = buffer.getInt(); // int32_t
   			lon = buffer.getInt(); // int32_t

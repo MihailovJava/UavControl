@@ -10,15 +10,28 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes("Implementation-Title": "Gradle",
+                "Implementation-Version": version,
+                "Premain-Class": "spring.ControllerConfig")
+
+
+    }
+}
+
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.11'
     compile("org.springframework.boot:spring-boot-starter:1.2.6.RELEASE");
     compile 'org.xerial:sqlite-jdbc:3.8.11.2'
+    compile 'org.springframework:spring-aop:4.2.3.RELEASE'
+    compile 'org.aspectj:aspectjweaver:1.8.7'
     compile 'org.springframework:spring-context:4.1.7.RELEASE'
     compile 'org.hibernate:hibernate-entitymanager:4.3.3.Final'
     compile 'org.hibernate:hibernate-core:4.3.3.Final'
     compile 'org.springframework.data:spring-data-jpa:1.8.1.RELEASE'
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.guava:guava:19.0-rc2'
+    compile 'javassist:javassist:3.12.1.GA'
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

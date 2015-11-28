@@ -1,0 +1,5 @@
+package mavlink
+
+
+class MavLinkPosition {
+}

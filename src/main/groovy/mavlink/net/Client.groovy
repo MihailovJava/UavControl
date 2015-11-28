@@ -1,41 +1,40 @@
 package mavlink.net
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
 import java.nio.charset.Charset
 
-@Component
-class Client implements TcpClient{
 
-
-    @Autowired
-    Environment environment
-
+class Client implements TcpClient {
 
     Socket socket
 
     String host
     Integer port
 
-    @PostConstruct
-    void init(){
-        host = environment.getProperty("tcp.client.host")
-        port = environment.getProperty("tcp.client.port") as Integer
-    }
+    boolean connect = false
+    Thread connectionThread
 
     public boolean connect() {
-        while (socket == null) {
-            try {
-                socket = new Socket(host, port)
-            } catch (Exception e) {
-                e.println("Server offline")
-                Thread.sleep(1000)
-            }
+        if (connectionThread == null) {
+            connectionThread = new Thread({
+                while (socket == null) {
+                    try {
+                        socket = new Socket(host, port)
+                        connect = true
+                    } catch (Exception e) {
+                        e.println("Server offline")
+                        Thread.sleep(1000)
+                    }
+                }
+            })
         }
-        return socket.isConnected()
+
+        return isConnect()
     }
 
     @Override
@@ -45,23 +44,25 @@ class Client implements TcpClient{
             println "Sent " + data
             return true;
         }
-
         return false
     }
 
     @Override
     byte[] receive() {
         if (!socket.isClosed()) {
-            byte[] tmp = new byte[2*1024]
-            int size = socket.inputStream.read(tmp)
-            return Arrays.copyOf(tmp,size)
+            byte[] tmp = new byte[2 * 1024]
+            byte b
+            int size = 0
+            while ((b = socket.inputStream.read()) != 0xFE);
+            tmp[size++] = 0xFE
+            tmp[size++] = socket.inputStream.read()
+            for (int i = 0; i < tmp[1] + 4 + 2; i++) {
+                tmp[size++] = socket.inputStream.read()
+            }
+
+            return Arrays.copyOf(tmp, size)
         }
         return null
-    }
-
-    public String send(String data) {
-        byte[] byteData = Charset.forName("UTF-8").encode(data).array()
-        send(byteData)
     }
 
 
