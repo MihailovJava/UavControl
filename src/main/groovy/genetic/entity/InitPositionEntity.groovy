@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import genetic.genetic.squad.SquadSimulator
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import genetic.repository.FormationRepository
-import genetic.spring.Config
+import genetic.spring.GeneticConfig
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -24,14 +24,24 @@ class InitPositionEntity {
     @Column
     String jsonPosition
 
+    @Column
+    Integer distance
+
+    @Column
+    Integer interval
+
 
     public static void main(String[] args) {
-        def context = new AnnotationConfigApplicationContext(Config.class)
+        def context = new AnnotationConfigApplicationContext(GeneticConfig.class)
         def bean = context.getBean(FormationRepository.class)
         def gson = new Gson();
-        SquadSimulator.formations.each { key, value ->
+        def interval =  context.getEnvironment().getProperty("interval") as Integer;
+        def distance = context.getEnvironment().getProperty("distance") as Integer;
+        SquadSimulator.formations3.each { key, value ->
             bean.save(new InitPositionEntity(
-                    number: 6,
+                    number: 3,
+                    distance: distance,
+                    interval: interval,
                     id: key,
                     jsonPosition: gson.toJson(value)))
         }

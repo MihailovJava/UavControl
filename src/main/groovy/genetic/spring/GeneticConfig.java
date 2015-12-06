@@ -2,6 +2,7 @@ package genetic.spring;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -16,9 +17,9 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@EnableJpaRepositories("repository")
+@EnableJpaRepositories("genetic.repository")
 @PropertySource("classpath:genetic/application.properties")
-public class Config {
+public class GeneticConfig {
     @Autowired
     Environment environment;
 
@@ -43,7 +44,7 @@ public class Config {
         LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
         bean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         bean.setDataSource(dataSource);
-        bean.setPackagesToScan("entity");
+        bean.setPackagesToScan("genetic.entity");
 
         bean.setJpaProperties(jpaProperties());
         return bean;

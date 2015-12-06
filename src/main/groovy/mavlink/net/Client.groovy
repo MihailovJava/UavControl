@@ -17,31 +17,40 @@ class Client implements TcpClient {
     Integer port
 
     boolean connect = false
-    Thread connectionThread
+    private OutputStream outputStream
+    private InputStream inputStream
 
-    public boolean connect() {
-        if (connectionThread == null) {
-            connectionThread = new Thread({
-                while (socket == null) {
-                    try {
-                        socket = new Socket(host, port)
-                        connect = true
-                    } catch (Exception e) {
-                        e.println("Server offline")
-                        Thread.sleep(1000)
-                    }
+
+    public Client(){
+        new Thread({
+            while (socket == null) {
+                try {
+                    socket = new Socket(host, port)
+                    connect = true
+                    outputStream = socket.outputStream
+                    inputStream = socket.inputStream
+                    println("New connection " + host + ":" + port)
+                } catch (Exception e) {
+
+                    e.println("Server offline " + host + ":" + port)
+                    e.printStackTrace()
+                    Thread.sleep(1000)
                 }
-            })
-        }
+            }
+        }).start()
+    }
 
+    @Override
+    boolean connect() {
         return isConnect()
     }
 
     @Override
     boolean send(byte[] data) {
-        if (!socket.isClosed()) {
-            socket.outputStream.write(data)
-            println "Sent " + data
+        if (outputStream != null && !socket?.isClosed()) {
+
+            outputStream.write(data)
+        //    println "Sent " + data.toString() + " " + host + ":" + port
             return true;
         }
         return false
@@ -49,17 +58,17 @@ class Client implements TcpClient {
 
     @Override
     byte[] receive() {
-        if (!socket.isClosed()) {
+        if (inputStream != null && !socket?.isClosed()) {
             byte[] tmp = new byte[2 * 1024]
             byte b
             int size = 0
-            while ((b = socket.inputStream.read()) != 0xFE);
+            while ((b = inputStream.read()) != 0xFE);
             tmp[size++] = 0xFE
-            tmp[size++] = socket.inputStream.read()
+            tmp[size++] = inputStream.read()
             for (int i = 0; i < tmp[1] + 4 + 2; i++) {
-                tmp[size++] = socket.inputStream.read()
+                tmp[size++] = inputStream.read()
             }
-
+      //      print host + ":" + port + " "
             return Arrays.copyOf(tmp, size)
         }
         return null
