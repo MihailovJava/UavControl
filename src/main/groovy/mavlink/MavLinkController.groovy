@@ -1,19 +1,23 @@
 package mavlink
 
-import genetic.repository.FormationRepository
-import genetic.repository.InitPositionRepository
-import mavlink.net.MavConnection
+import mavlink.control.commands.FlightToFormationCommand
+import mavlink.control.commands.FlightToPointCommand
+import mavlink.control.commands.TakeOffCommand
+import mavlink.control.conditions.FlightToPointCondition
+import mavlink.util.ResettableCountDownLatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
-import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
+import java.util.concurrent.CountDownLatch
 
 
 class MavLinkController implements Observer {
 
-    List<FormationControl> connectionList
+    List<MavAircraft> connectionList
+
+    List<MavLinkPosition> missionList
 
     @Autowired
     Environment environment
@@ -27,17 +31,29 @@ class MavLinkController implements Observer {
                 new File(environment.getProperty('mavlink.control.file.name.position')),
                 new File(environment.getProperty('mavlink.control.file.name.orientation'))]
         files.each {it.withWriter { w -> w.write("") }}
+        def latch = new ResettableCountDownLatch(connectionList.size())
+        connectionList.each {
+            it.formationControl.commandDeque.add(new TakeOffCommand(latch: latch))
+        }
+        connectionList.each {
+            it.formationControl.commandDeque.add(new FlightToFormationCommand(latch: latch))
+        }
+        connectionList.each {
+            it.formationControl.commandDeque.add(new FlightToPointCommand(
+                    condition: new FlightToPointCondition(target: new MavLinkPosition(nedX: 30, nedY:  30, nedZ:-14 )),
+                    latch: latch))
+        }
     }
 
     @Override
     void update(Observable o, Object arg) {
         List<Object> args = arg as ArrayList
-        if( args.get(0) instanceof MavLinkPosition ) {
-            files[0] << (arg.toString() + '\n')
+        if( args.get(0) instanceof MavAircraft ) {
+            MavAircraft aircraft = args[0] as MavAircraft
+            files[0] << ([aircraft.currentPosition, args[1]].toString() + '\n')
+            files[1] << ([aircraft.currentOrientation, args[1]].toString() + '\n')
         }
-        if( args.get(0) instanceof MavLinkOrientation ) {
-            files[1] << (arg.toString() + '\n')
-        }
+
     }
 
     @PreDestroy

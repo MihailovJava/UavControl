@@ -13650,7 +13650,7 @@ public class MavLink {
     public static class MSG_SET_ATTITUDE_TARGET extends Message {
 
         private long time_boot_ms; // Timestamp in milliseconds since system boot
-        private float q[] = new float[4]; // Attitude quaternion (w, x, y, z order, zero-rotation is 1, 0, 0, 0)
+        private float q[]; // Attitude quaternion (w, x, y, z order, zero-rotation is 1, 0, 0, 0)
         private float body_roll_rate; // Body roll rate in radians per second
         private float body_pitch_rate; // Body roll rate in radians per second
         private float body_yaw_rate; // Body roll rate in radians per second
@@ -13683,7 +13683,7 @@ public class MavLink {
 
         @Override
         public int getLength() {
-            return 27;
+            return 39;
         }
 
         @Override
@@ -13766,8 +13766,11 @@ public class MavLink {
 
         protected ByteBuffer decodePayload(ByteBuffer buffer) {
 
+            q = new float[4];
             time_boot_ms = buffer.getInt() & 0xffffffff; // uint32_t
-
+            for (int i = 0; i < 4; i++) {
+                q[i] = buffer.getFloat();
+            }
             body_roll_rate = buffer.getFloat(); // float
             body_pitch_rate = buffer.getFloat(); // float
             body_yaw_rate = buffer.getFloat(); // float
@@ -13782,7 +13785,9 @@ public class MavLink {
 
             buffer.putInt((int) (time_boot_ms & 0xffffffff)); // uint32_t
 
-
+            for (int i = 0; i < 4; i++) {
+                buffer.putFloat(q[i]);
+            }
             buffer.putFloat(body_roll_rate); // float
             buffer.putFloat(body_pitch_rate); // float
             buffer.putFloat(body_yaw_rate); // float

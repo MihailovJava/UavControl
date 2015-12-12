@@ -49,7 +49,7 @@ class MavClientSend implements Runnable {
                         delay = pair.value
                     }
                     msg.sequenceIndex = count
-                    println(msg.toString() + " time " + System.currentTimeMillis())
+               //     println(msg.toString() + " time " + System.currentTimeMillis())
                     client.send(msg.encode())
                 } catch (Exception e) {
                     e.printStackTrace()

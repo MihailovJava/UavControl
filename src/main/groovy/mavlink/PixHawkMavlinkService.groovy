@@ -1,5 +1,7 @@
 package mavlink
 
+import math.Quaternion
+
 class PixHawkMavLinkService implements MavLinkService {
 
 
@@ -19,6 +21,8 @@ class PixHawkMavLinkService implements MavLinkService {
         msg = MavLink.Message.decodeMessage(msg.revert().encode())
         connectionList.get(id).task.addTask(msg,20L)
     }
+
+
 
     @Override
     MavLinkPosition getCurrentPosition(int id) {
@@ -41,5 +45,20 @@ class PixHawkMavLinkService implements MavLinkService {
         connectionList.each {
             it.task.init()
         }
+    }
+
+    @Override
+    void changeOrientation(Quaternion orient, int id) {
+        def msg = new MavLink.MSG_SET_ATTITUDE_TARGET(
+                MavLink.MAV_SYSTEM_ID, MavLink.MAV_COMPONENT_ID, 0L,
+                orient.q,
+                0f,0f,0f,
+                0.6f,
+                1, 1,
+                (int)0b001_11_111
+        )
+
+        msg = MavLink.Message.decodeMessage(msg.revert().encode())
+        connectionList.get(id).task.addTask(msg,20L)
     }
 }

@@ -8,6 +8,7 @@ import mavlink.MavLinkController
 import mavlink.MavLinkUnity
 import mavlink.MavTask
 import mavlink.PixHawkMavLinkService
+import mavlink.control.commands.Command
 import mavlink.net.Client
 import mavlink.net.MavClientReceive
 import mavlink.net.MavClientSend
@@ -24,6 +25,10 @@ import org.springframework.context.annotation.PropertySource
 import org.springframework.context.annotation.Scope
 import org.springframework.core.env.Environment
 
+import javax.swing.JFrame
+import javax.swing.WindowConstants
+import java.util.concurrent.ConcurrentLinkedDeque
+
 @Configuration
 @PropertySource("classpath:mavlink/application.properties")
 @ComponentScan("mavlink")
@@ -35,6 +40,10 @@ class ControllerConfig {
     public static void main(String[] args) {
         //   SpringApplication.run(ControllerConfig.class)
         def context = new AnnotationConfigApplicationContext(ControllerConfig.class, GeneticConfig.class)
+        def bean = context.getBean(JFrame.class)
+        bean.setVisible(true)
+        //def bean = context.getBean(PixHawkMavLinkService.class)
+        //   bean.changeOrientation(new Quaternion((float)(3*Math.PI/4),0,0),0)
         //  MavLinkService service = context.getBean(MavLinkService.class)
         // service.prepareToFlight(0)
         //  service.flightHere(new MavLinkPosition(nedX: 11.2*5,nedY: 11.2*5,nedZ: -24),0)
@@ -56,7 +65,13 @@ class ControllerConfig {
     @Scope("prototype")
     FormationControl formationControl() {
         def id = environment.getProperty("formation.init.id") as Integer
-        def formationControl = new FormationControl(formationId: id)
+        def deltaPos = environment.getProperty("formation.delta.pos") as Float
+        def deltaYaw = environment.getProperty("formation.delta.yaw") as Float
+        def formationControl = new FormationControl(
+                formationId: id,
+                commandDeque: new ConcurrentLinkedDeque<Command>(),
+                deltaPos: deltaPos,
+                deltaYaw: deltaYaw)
         return formationControl
     }
 
@@ -117,21 +132,32 @@ class ControllerConfig {
     }
 
     @Bean
-    MavLinkUnity mavLinkUnity(){
+    MavLinkUnity mavLinkUnity() {
         new MavLinkUnity(sender: sender())
     }
 
     @Bean
-    UnitySend sender(){
+    UnitySend sender() {
         new UnitySend(client: netClient())
     }
 
     @Bean
-    Client netClient(){
+    Client netClient() {
         def host = environment.getProperty("net.host")
         def port = environment.getProperty("net.port") as Integer
-        def client = new Client(port: port, host: host)
+        def client = new Client(host, port)
         return client
+    }
+
+    @Bean
+    JFrame form() {
+        JFrame mainForm = new JFrame(environment.getProperty("form.title"))
+        mainForm.setSize(
+                environment.getProperty("form.width") as Integer,
+                environment.getProperty("form.height") as Integer);
+        mainForm.setLocationRelativeTo(null);
+        mainForm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        return mainForm
     }
 
     @Bean
@@ -166,7 +192,7 @@ class ControllerConfig {
         def port = environment.getProperty("tcp.client.port") as Integer
         port += instance * 10
         instance++
-        def client = new Client(port: port, host: host)
+        def client = new Client(host, port)
         return client
     }
 

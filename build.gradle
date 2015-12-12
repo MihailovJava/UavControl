@@ -3,13 +3,21 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'groovy'
 apply plugin: 'java'
+apply plugin: 'application'
 
 sourceCompatibility = 1.8
+
+mainClassName = "mavlink.spring.ControllerConfig"
 
 repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'mavlink.spring.ControllerConfig'
+    }
+}
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.11'

@@ -21,23 +21,31 @@ class Client implements TcpClient {
     private InputStream inputStream
 
 
-    public Client(){
-        new Thread({
-            while (socket == null) {
-                try {
-                    socket = new Socket(host, port)
-                    connect = true
-                    outputStream = socket.outputStream
-                    inputStream = socket.inputStream
-                    println("New connection " + host + ":" + port)
-                } catch (Exception e) {
+    public Client(String host, int port) {
+        try {
+            socket = new Socket(host, port)
+            this.port = port
+            this.host = host
+            connect = true
+            outputStream = socket.outputStream
+            inputStream = socket.inputStream
+        } catch (Exception e) {
 
-                    e.println("Server offline " + host + ":" + port)
-                    e.printStackTrace()
-                    Thread.sleep(1000)
-                }
-            }
-        }).start()
+
+        }
+        println("New connection " + host + ":" + port)
+        /* new Thread({
+             while (socket == null) {
+                 try {
+
+                 } catch (Exception e) {
+
+                     e.println("Server offline " + host + ":" + port)
+                     e.printStackTrace()
+                     Thread.sleep(1000)
+                 }
+             }
+         }).start()*/
     }
 
     @Override
@@ -50,7 +58,7 @@ class Client implements TcpClient {
         if (outputStream != null && !socket?.isClosed()) {
 
             outputStream.write(data)
-        //    println "Sent " + data.toString() + " " + host + ":" + port
+      //      println "Sent " + data.toString() + " " + host + ":" + port
             return true;
         }
         return false
