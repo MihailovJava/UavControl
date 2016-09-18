@@ -1,9 +1,9 @@
 package genetic.entity
 
 import com.google.gson.Gson
-import genetic.genetic.squad.SquadSimulator
+import SquadSimulator
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
-import genetic.repository.FormationRepository
+import FormationRepository
 import genetic.spring.GeneticConfig
 
 import javax.persistence.Column

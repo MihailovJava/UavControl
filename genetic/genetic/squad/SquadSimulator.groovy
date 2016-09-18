@@ -1,11 +1,11 @@
 package genetic.genetic.squad
 
 import com.google.gson.Gson
-import genetic.entity.FormationEntity
+import FormationEntity
 import genetic.genetic.system.*
 import genetic.genetic.system.Populations
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
-import genetic.repository.FormationRepository
+import FormationRepository
 import genetic.spring.GeneticConfig
 
 public class SquadSimulator {
@@ -19,19 +19,19 @@ public class SquadSimulator {
                     new SquadGene(5, 4, 5),
                     new SquadGene(6, 3, 6)],
             "Колонна6": [
-                    new SquadGene(4,1, 1),
-                    new SquadGene(4,2, 2),
-                    new SquadGene(4,3, 3),
-                    new SquadGene(4,4, 4),
-                    new SquadGene(4,5, 5),
-                    new SquadGene(4,6, 6)],
+                    new SquadGene(4, 1, 1),
+                    new SquadGene(4, 2, 2),
+                    new SquadGene(4, 3, 3),
+                    new SquadGene(4, 4, 4),
+                    new SquadGene(4, 5, 5),
+                    new SquadGene(4, 6, 6)],
             "Фронт6"  : [
-                    new SquadGene(1,4, 1),
-                    new SquadGene(2,4, 2),
-                    new SquadGene(3,4, 3),
-                    new SquadGene(4,4, 4),
-                    new SquadGene(5,4, 5),
-                    new SquadGene(6,4, 6)],
+                    new SquadGene(1, 4, 1),
+                    new SquadGene(2, 4, 2),
+                    new SquadGene(3, 4, 3),
+                    new SquadGene(4, 4, 4),
+                    new SquadGene(5, 4, 5),
+                    new SquadGene(6, 4, 6)],
             "Пеленг6" : [
                     new SquadGene(1, 1, 1),
                     new SquadGene(2, 2, 2),
@@ -54,13 +54,13 @@ public class SquadSimulator {
                     new SquadGene(1, 2, 2),
                     new SquadGene(2, 3, 3)],
             "Колонна3": [
-                    new SquadGene(2,1, 1),
-                    new SquadGene(2,2, 2),
-                    new SquadGene(2,3, 3)],
+                    new SquadGene(2, 1, 1),
+                    new SquadGene(2, 2, 2),
+                    new SquadGene(2, 3, 3)],
             "Фронт3"  : [
-                    new SquadGene(1,2, 1),
-                    new SquadGene(2,2, 2),
-                    new SquadGene(3,2, 3)],
+                    new SquadGene(1, 2, 1),
+                    new SquadGene(2, 2, 2),
+                    new SquadGene(3, 2, 3)],
             "Пеленг3" : [
                     new SquadGene(1, 1, 1),
                     new SquadGene(2, 2, 2),
@@ -71,9 +71,9 @@ public class SquadSimulator {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(GeneticConfig.class);
         FormationRepository repository = context.getBean(FormationRepository.class)
 
-        def interval =  context.getEnvironment().getProperty("interval") as Integer;
+        def interval = context.getEnvironment().getProperty("interval") as Integer;
         def distance = context.getEnvironment().getProperty("distance") as Integer;
-        def formations = formations3
+        def formations = formations6
         formations.each { key, value ->
             formations.each { key2, value2 ->
                 if (key.compareTo(key2) != 0) {
@@ -91,19 +91,26 @@ public class SquadSimulator {
                     }
 
                     Person person = persons.get(0);
+                    int flag = 0;
                     try {
                         Populations quadPopulations = new SquadPopulations(new Population(persons), factory);
-                        for (int i = 0; i < 1000; i++) {
+                        int i = 0;
+                        for (; i < 1000 && flag < 740; i++) {
                             Person bestPerson = GeneticUtils.getBestPerson(quadPopulations.getLastPopulation());
                             if (bestPerson.getFitness() < person.getFitness()) {
                                 person = bestPerson;
+                                flag = 0;
+                            }
+                            if (bestPerson.getFitness() == person.getFitness()) {
+                                flag++;
                             }
                             //  System.out.println("Population " + (i + 1) + ". Best person: " + bestPerson);
                             //  System.out.println("Fitness mean: " + GeneticUtils.getFitnessMean(quadPopulations.getLastPopulation()));
                             quadPopulations.nextGen();
                         }
+                        flag = i;
                     } finally {
-                        System.out.println("Best of the best: " + person);
+                        System.out.println("Best of the best: " + person + " count = " + flag);
                     }
 
                     Gson gson = new Gson();
@@ -114,7 +121,8 @@ public class SquadSimulator {
                             jsonArray: gson.toJson(person.getChromosome()),
                             number: n,
                             interval: interval,
-                            distance: distance))
+                            distance: distance,
+                            sumLength: person.getFitness()))
                     System.out.println("from $key to $key2 " + gson.toJson(person.getChromosome()));
                 }
             }

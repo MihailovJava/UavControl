@@ -29,11 +29,11 @@ class Client implements TcpClient {
             connect = true
             outputStream = socket.outputStream
             inputStream = socket.inputStream
+            println("New connection " + host + ":" + port)
         } catch (Exception e) {
-
-
+            e.printStackTrace()
         }
-        println("New connection " + host + ":" + port)
+
         /* new Thread({
              while (socket == null) {
                  try {
@@ -50,7 +50,7 @@ class Client implements TcpClient {
 
     @Override
     boolean connect() {
-        return isConnect()
+        return connect
     }
 
     @Override

@@ -26,7 +26,7 @@ class UnitySend implements Runnable {
                 }
             }
 
-            Thread.sleep(1)
+            Thread.sleep(10)
         }
     }
 }

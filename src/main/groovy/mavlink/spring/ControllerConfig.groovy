@@ -1,7 +1,7 @@
 package mavlink.spring
 
 import com.google.gson.Gson
-import genetic.spring.GeneticConfig
+import hungarian.spring.HungarianConfig
 import mavlink.FormationControl
 import mavlink.MavAircraft
 import mavlink.MavLinkController
@@ -39,7 +39,7 @@ class ControllerConfig {
 
     public static void main(String[] args) {
         //   SpringApplication.run(ControllerConfig.class)
-        def context = new AnnotationConfigApplicationContext(ControllerConfig.class, GeneticConfig.class)
+        def context = new AnnotationConfigApplicationContext(ControllerConfig.class, HungarianConfig.class)
         def bean = context.getBean(JFrame.class)
         bean.setVisible(true)
         //def bean = context.getBean(PixHawkMavLinkService.class)
@@ -83,6 +83,7 @@ class ControllerConfig {
             def aircraft = aircraft()
             aircraft.id = i
             aircraft.formationControl = formationControl()
+            aircraft.formationControl.positionInList = i
             aircraft.formationControl.positionInFormation = i
             aircraftArrayList.add(aircraft)
         }

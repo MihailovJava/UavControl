@@ -1,6 +1,6 @@
 package genetic.repository
 
-import genetic.entity.InitPositionEntity
+import InitPositionEntity
 import org.springframework.data.repository.CrudRepository
 
 

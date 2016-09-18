@@ -51,8 +51,8 @@ class MavLinkUnity implements Observer {
             buffer.putDouble(position.nedY)
             buffer.putDouble(-position.nedZ)
             buffer.putDouble(orientation.gama)
-            buffer.putDouble(-orientation.theta)
-            buffer.putDouble(orientation.psi)
+            buffer.putDouble(orientation.theta)
+            buffer.putDouble(-orientation.psi)
 
             sender.byteMsgs.add(buffer)
         }

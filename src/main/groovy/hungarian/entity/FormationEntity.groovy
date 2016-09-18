@@ -1,4 +1,4 @@
-package genetic.entity
+package hungarian.entity
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -29,5 +29,8 @@ public class FormationEntity {
 
     @Column
     String jsonArray
+
+    @Column
+    Double sumLength
 
 }

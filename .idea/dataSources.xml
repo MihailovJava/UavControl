@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="3805007807">
+    <data-source source="LOCAL" name="formation_hungarian" uuid="bbc72200-3a56-4a01-b33a-f515752b44ea">
+      <driver-ref>9ab05a49-c2ba-441e-8822-01f7a6ca1e25</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:E:\workspace\Java\GroupControl\src\main\resources\formation_hungarian.db</jdbc-url>
+      <libraries>
+        <library>
+          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.xerial/sqlite-jdbc/3.8.11.2/dec208cba8debb0a8b9204b08d8d887d63041f0f/sqlite-jdbc-3.8.11.2.jar!/</url>
+        </library>
+      </libraries>
+    </data-source>
+  </component>
+</project>

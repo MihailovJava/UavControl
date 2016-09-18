@@ -23,21 +23,21 @@ class MavAircraft extends Observable implements Observer {
                 currentPosition = new MavLinkPosition(
                         nedX: message.x, nedY: message.y, nedZ: message.z,
                         nedVX: message.vx, nedVY: message.vy, nedVZ: message.vz,
-                        time: message.time_boot_ms)
+                        time: System.currentTimeMillis())
                // println currentPosition
                 positions.add(currentPosition)
                 formationControl.checkMyPosition(currentPosition,id)
                 setChanged()
-                notifyObservers([this,id])
+                notifyObservers([currentPosition,id])
                 break
             case MavLink.MSG_ID_ATTITUDE:
                 message = message as MavLink.MSG_ATTITUDE
                 currentOrientation = new MavLinkOrientation(psi: message.yaw,theta: message.pitch,gama: message.roll,
-                        time: message.time_boot_ms)
+                        time: System.currentTimeMillis())
                 orientations.add(currentOrientation)
                 formationControl?.checkMyOrientation(currentOrientation,id)
                 setChanged()
-                notifyObservers([this,id])
+                notifyObservers([currentOrientation,id])
                 break
         }
     }

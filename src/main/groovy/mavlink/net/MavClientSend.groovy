@@ -1,10 +1,8 @@
 package mavlink.net
 
-import genetic.genetic.system.Pair
+
 import mavlink.MavLink
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
+import mavlink.util.Pair
 
 import javax.annotation.PostConstruct
 import java.nio.ByteBuffer

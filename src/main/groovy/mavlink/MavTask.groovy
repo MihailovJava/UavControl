@@ -1,15 +1,8 @@
 package mavlink
 
-import genetic.genetic.system.Pair
-import mavlink.net.MavClientReceive
+
 import mavlink.net.MavClientSend
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.core.env.Environment
-import org.springframework.stereotype.Component
-
-import javax.annotation.PostConstruct
-
+import mavlink.util.Pair
 
 class MavTask {
 

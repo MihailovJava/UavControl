@@ -1,4 +1,4 @@
-package genetic.genetic.system;
+package mavlink.util;
 
 import java.io.Serializable;
 

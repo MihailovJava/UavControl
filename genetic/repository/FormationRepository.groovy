@@ -1,6 +1,6 @@
 package genetic.repository
 
-import genetic.entity.FormationEntity
+import FormationEntity
 import org.springframework.data.repository.CrudRepository
 
 
